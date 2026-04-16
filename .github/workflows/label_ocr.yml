@@ -2,27 +2,37 @@ name: Process Shipping Label
 on:
   push:
     paths:
-      - 'labels/**' # Runs whenever a file is added to the 'labels' folder
+      - 'labels/pending/**'
 
 jobs:
-  extract-and-send:
+  ocr-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pip install google-generativeai
 
-      - name: Run OCR Script
+      - name: Create Processed Folder
+        run: mkdir -p labels/processed
+
+      - name: Run OCR and Move Files
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python process_label.py
+
+      - name: Commit Move
         run: |
-          # Finds the most recently added image in the labels folder
-          LATEST_IMAGE=$(ls -t labels/* | head -1)
-          python process_label.py "$LATEST_IMAGE"
+          git config --global user.name "LabelBot"
+          git config --global user.email "bot@github.com"
+          git add labels/
+          git commit -m "Automated: Moved processed labels to history" || echo "No changes to commit"
+          git push
