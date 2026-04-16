@@ -1,0 +1,28 @@
+name: Process Shipping Label
+on:
+  push:
+    paths:
+      - 'labels/**' # Runs whenever a file is added to the 'labels' folder
+
+jobs:
+  extract-and-send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install google-generativeai
+
+      - name: Run OCR Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # Finds the most recently added image in the labels folder
+          LATEST_IMAGE=$(ls -t labels/* | head -1)
+          python process_label.py "$LATEST_IMAGE"
