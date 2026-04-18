@@ -3,11 +3,8 @@ import sys
 from google import genai
 from google.genai import types
 
-# Setup the client with the stable V1 configuration
-client = genai.Client(
-    api_key=os.environ["GEMINI_API_KEY"],
-    http_options={'api_version': 'v1'}
-)
+# Setup the client (Removing the v1 override so it correctly defaults to v1beta)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 def process_label(image_path):
     # Only process image files
@@ -24,9 +21,9 @@ def process_label(image_path):
         image_bytes = f.read()
         
     try:
-        # Use types.Part.from_bytes to tell the SDK exactly what we're sending
+        # Using the exact string from the Gemini 3 documentation
         response = client.models.generate_content(
-            model="gemini-3.0-flash",
+            model="gemini-3-flash-preview",
             contents=[
                 "Extract only the Order ID from this label. Return just the digits.",
                 types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
@@ -35,8 +32,6 @@ def process_label(image_path):
         
         order_id = response.text.strip()
         print(f"Detected Order ID: {order_id}")
-        
-        # NOTE: Once this works, you can insert your Shopify & WhatsApp logic here
         
         return order_id
         
