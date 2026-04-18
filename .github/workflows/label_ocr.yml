@@ -5,6 +5,12 @@ on:
       - 'labels/pending/**'
   workflow_dispatch: # Enable manual trigger
 
+env:
+  # This tells GitHub to use the newer Node engine and stops the warning
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
+  # This forces Python to show logs immediately (Fixes your "missing print" issue)
+  PYTHONUNBUFFERED: "1"
+
 jobs:
   ocr-job:
     runs-on: ubuntu-latest
