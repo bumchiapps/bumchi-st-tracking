@@ -54,7 +54,8 @@ def send_whatsapp_message(details: ShippingDetails):
                         {"type": "text", "parameter_name": "name", "text": details.name or "Customer"},
                         {"type": "text", "parameter_name": "order_id", "text": details.order_id or "Unknown"},
                         {"type": "text", "parameter_name": "courier_name", "text": "S T Couriers"},
-                        {"type": "text", "parameter_name": "tracking_id", "text": details.tracking_id or "Pending"}
+                        {"type": "text", "parameter_name": "tracking_id", "text": details.tracking_id or "Pending"},
+                        {"type": "text", "parameter_name": "tracking_url", "text": "https://stcourier.com/track/shipment"},
                     ]
                 },
                 {
