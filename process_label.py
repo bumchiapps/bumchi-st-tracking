@@ -1,5 +1,6 @@
 import os
 import csv
+import json
 import requests
 from datetime import datetime
 from google import genai
@@ -18,10 +19,9 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 # --- WhatsApp API Configuration ---
 WA_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 WA_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_ID") 
-WA_TEMPLATE_NAME = "tracking_details"
+WA_TEMPLATE_NAME = "YOUR_APPROVED_TEMPLATE_NAME" # Ensure this matches Meta exactly
 
 def send_whatsapp_message(details: ShippingDetails):
-    # Hardcoded for testing. Later replace with: to_number = details.phone
     to_number = "919994555088" 
     
     url = f"https://graph.facebook.com/v19.0/{WA_PHONE_NUMBER_ID}/messages"
@@ -31,7 +31,6 @@ def send_whatsapp_message(details: ShippingDetails):
         "Content-Type": "application/json"
     }
     
-    # Variables must be in the exact order they appear in the template {{1}}, {{2}}, etc.
     payload = {
         "messaging_product": "whatsapp",
         "to": to_number,
@@ -39,32 +38,55 @@ def send_whatsapp_message(details: ShippingDetails):
         "template": {
             "name": WA_TEMPLATE_NAME,
             "language": {
-                "code": "en" # Adjust if your template is en_US, en_GB, etc.
+                "code": "en" 
             },
             "components": [
                 {
                     "type": "body",
                     "parameters": [
-                        {"type": "text", "text": details.name or "Customer"},               # {{1}} name
-                        {"type": "text", "text": details.order_id or "Unknown"},            # {{2}} order_id
-                        {"type": "text", "text": "S T Couriers"},                           # {{3}} courier_name
-                        {"type": "text", "text": details.tracking_id or "Pending"},         # {{4}} tracking_id
-                        {"type": "text", "text": "https://stcourier.com/track/shipment"}    # {{5}} tracking_url
+                        {"type": "text", "text": details.name or "Customer"},
+                        {"type": "text", "text": details.order_id or "Unknown"},
+                        {"type": "text", "text": "S T Couriers"},
+                        {"type": "text", "text": details.tracking_id or "Pending"},
+                        {"type": "text", "text": "https://stcourier.com/track/shipment"}
                     ]
                 }
             ]
         }
     }
 
+    # --- AGGRESSIVE DEBUG LOGGING START ---
+    print("\n" + "="*50)
+    print("🚨 DEBUG: WHATSAPP AUTHENTICATION & PAYLOAD DUMP")
+    print("="*50)
+    
+    # Using repr() and quotes to expose hidden newlines (\n) or trailing spaces
+    print(f"PHONE_ID String : '{WA_PHONE_NUMBER_ID}'")
+    print(f"PHONE_ID Length : {len(str(WA_PHONE_NUMBER_ID))} chars")
+    print("-" * 50)
+    print(f"TOKEN String    : '{WA_TOKEN}'")
+    print(f"TOKEN Length    : {len(str(WA_TOKEN))} chars")
+    print("-" * 50)
+    print(f"TARGET URL      : {url}")
+    print(f"AUTH HEADER     : '{headers['Authorization']}'")
+    print("PAYLOAD         :")
+    print(json.dumps(payload, indent=2))
+    print("="*50 + "\n")
+    # --- AGGRESSIVE DEBUG LOGGING END ---
+
     try:
         response = requests.post(url, headers=headers, json=payload)
+        
+        # Log the exact HTTP status code back from Meta
+        print(f"Meta HTTP Status Code: {response.status_code}")
+        
         response.raise_for_status()
         print(f"WhatsApp message successfully sent for order {details.order_id}")
+        
     except requests.exceptions.RequestException as e:
         print(f"Failed to send WhatsApp message. Error: {e}")
-        # Print the exact Meta API error if there is one (very helpful for debugging)
         if response is not None and response.text:
-            print(f"Meta API Response: {response.text}")
+            print(f"Raw Meta API Response: {response.text}")
 
 def log_to_csv(details: ShippingDetails, filename: str):
     csv_file = "shipping_master_log.csv"
@@ -95,7 +117,6 @@ def process_label(image_path):
         image_bytes = f.read()
         
     try:
-        # Kept the Flash model as requested
         response = client.models.generate_content(
             model="gemini-3-flash-preview", 
             contents=[
@@ -110,11 +131,8 @@ def process_label(image_path):
         )
         
         details: ShippingDetails = response.parsed
-        
-        # 1. Log the details
         log_to_csv(details, filename)
         
-        # 2. Trigger the WhatsApp automation if we got a tracking ID
         if details.tracking_id:
             send_whatsapp_message(details)
         else:
