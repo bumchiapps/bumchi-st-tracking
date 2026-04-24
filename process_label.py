@@ -19,7 +19,7 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 # --- WhatsApp API Configuration ---
 WA_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 WA_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_ID") 
-WA_TEMPLATE_NAME = "YOUR_APPROVED_TEMPLATE_NAME" # Ensure this matches Meta exactly
+WA_TEMPLATE_NAME = "tracking_details" # Ensure this matches Meta exactly
 
 def send_whatsapp_message(details: ShippingDetails):
     to_number = "919994555088" 
