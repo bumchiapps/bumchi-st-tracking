@@ -39,32 +39,27 @@ def send_whatsapp_message(details: ShippingDetails):
         "Content-Type": "application/json"
     }
     
-    payload = {
+   payload = {
         "messaging_product": "whatsapp",
         "to": to_number,
         "type": "template",
         "template": {
             "name": WA_TEMPLATE_NAME,
             "language": {
-                # CHANGE THIS to "en_US" or "en_GB" if your template specifies a region!
-                "code": "en" 
+                "code": "en" # Ensure this perfectly matches your Meta template language!
             },
             "components": [
                 {
                     "type": "body",
                     "parameters": [
-                        # Added the "name" keys to match named variables.
-                        # If your Meta dashboard uses {{1}}, {{2}}, change these to "name": "1", "name": "2", etc.
-                        {"type": "text", "name": "name", "text": details.name or "Customer"},
-                        {"type": "text", "name": "order_id", "text": details.order_id or "Unknown"},
-                        {"type": "text", "name": "courier_name", "text": "S T Couriers"},
-                        {"type": "text", "name": "tracking_id", "text": details.tracking_id or "Pending"}
-                        
-                        # Note: If tracking_url is IN THE TEXT BODY, uncomment the line below.
-                        # {"type": "text", "name": "tracking_url", "text": "https://stcourier.com/track/shipment"}
+                        # Changed "name" to the strict Meta requirement: "parameter_name"
+                        {"type": "text", "parameter_name": "name", "text": details.name or "Customer"},
+                        {"type": "text", "parameter_name": "order_id", "text": details.order_id or "Unknown"},
+                        {"type": "text", "parameter_name": "courier_name", "text": "S T Couriers"},
+                        {"type": "text", "parameter_name": "tracking_id", "text": details.tracking_id or "Pending"}
                     ]
                 },
-                # Note: If tracking_url is a CTA BUTTON, leave this block active. If it's not a button, delete this block.
+                # The dynamic URL button
                 {
                     "type": "button",
                     "sub_type": "url",
@@ -72,7 +67,7 @@ def send_whatsapp_message(details: ShippingDetails):
                     "parameters": [
                         {
                             "type": "text",
-                            "text": "https://stcourier.com/track/shipment" # The dynamic part of your URL
+                            "text": "https://stcourier.com/track/shipment" 
                         }
                     ]
                 }
