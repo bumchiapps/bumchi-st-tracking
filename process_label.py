@@ -17,7 +17,7 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 WA_TOKEN = os.environ.get("WHATSAPP_TOKEN")
 WA_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_ID") 
-WA_TEMPLATE_NAME = "YOUR_APPROVED_TEMPLATE_NAME"
+WA_TEMPLATE_NAME = "tracking_details"
 
 EMAIL_SENDER = os.environ.get("GMAIL_SENDER")
 EMAIL_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD")
