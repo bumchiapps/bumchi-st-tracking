@@ -24,12 +24,15 @@ jobs:
           python-version: '3.12'
 
       - name: Install Dependencies
+        # Added requests library here
         run: |
-          pip install google-genai pydantic
+          pip install google-genai pydantic requests
 
-      - name: Run OCR and Move Files
+      - name: Run OCR, Send WhatsApp, and Move Files
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WHATSAPP_TOKEN: ${{ secrets.WHATSAPP_TOKEN }}
+          WHATSAPP_PHONE_ID: ${{ secrets.WHATSAPP_PHONE_ID }}
         run: python -u process_label.py
 
       - name: Commit and Push Logs
@@ -37,10 +40,8 @@ jobs:
           git config --global user.name "LabelBot"
           git config --global user.email "bot@github.com"
           
-          # Crucial: Stage the CSV file and the deletions in the labels folder
           git add shipping_master_log.csv
           git add labels/
           
-          # [skip ci] prevents the workflow from triggering itself after the push
-          git commit -m "Automated: Logged labels and cleaned pending [skip ci]" || echo "No changes"
+          git commit -m "Automated: Logged labels, sent WA updates, cleaned pending [skip ci]" || echo "No changes"
           git push
