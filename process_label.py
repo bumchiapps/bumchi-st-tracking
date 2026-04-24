@@ -57,17 +57,6 @@ def send_whatsapp_message(details: ShippingDetails):
                         {"type": "text", "parameter_name": "tracking_id", "text": details.tracking_id or "Pending"},
                         {"type": "text", "parameter_name": "tracking_url", "text": "https://stcourier.com/track/shipment"},
                     ]
-                },
-                {
-                    "type": "button",
-                    "sub_type": "url",
-                    "index": 0, # Targets the first CTA button in your template
-                    "parameters": [
-                        {
-                            "type": "text",
-                            "text": "https://stcourier.com/track/shipment" 
-                        }
-                    ]
                 }
             ]
         }
